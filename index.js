@@ -1,3 +1,5 @@
+// const uid = require('uid');
+const fs = require('fs');
 const config = require('config');
 const { Console } = require('console');
 
@@ -24,6 +26,8 @@ if (os.platform() == 'win32') {
 //  Config
 const dbConnection = config.get('DBConnection');
 
+// console.log(uid.uid());
+
 const dbConn = {
     iHost: '',
     iUser: '',
@@ -31,50 +35,79 @@ const dbConn = {
 }
 
 let host = '';
+let sa2Mng = [];
 
 if (config.has('DBConnection.host')) {
    dbConn.iHost = config.get('DBConnection.host');
 } else {
    throw new Error('error in config DBConnection.host');
 }
+// console.log(dbConn.iHost);
 
-console.log(dbConn.iHost);
 // ----------------------------------------------------
 
 // ----------------------------------------------------
 //  Test pop3
-function chilkatExample() {
+function doPOP3Mail() {
     var mailman = new chilkat.MailMan();
 
     mailman.MailHost = "pop.mail.ru";
     mailman.PopUsername = "alkuplenko@mail.ru";
-    mailman.PopPassword = "F70X29UAihqs7se6KaEu";
+    mailman.PopPassword = "";
     mailman.PopSsl = true;
     mailman.MailPort = 995;
 
-    // mailman.MailHost = "lssv03.domain.local";
-    // mailman.PopUsername = "DOMAIN\ARogozin";
-    // mailman.PopPassword = "";
-    // mailman.PopSsl = true;
-    // mailman.MailPort = 110;
-
-    // Количество писем в
+    // Количество писем в ящике
     var numMessages = mailman.GetMailboxCount();
-    console.log(`num messages:` + numMessages);
+    console.log(`Messages total:` + numMessages);
 
-    var bundle = mailman.GetAllHeaders(1)
-
+    var bundle = mailman.CopyMail();
     if (mailman.LastMethodSuccess !== true) {
         console.log(mailman.LastErrorText);
         return;
     }
 
+    // Получение UIDls
+    var saUidls = mailman.GetUidls(); // saUidls.GetString(0)
+    if (mailman.LastMethodSuccess !== true) {
+        console.log(mailman.LastErrorText);
+        return;
+    }
+
+    // Declarations
     var i = 0;
     var email;
-    while (i < bundle.MessageCount - 1) {
+    var dirPath = "attachments";
+    var mDir = "";
+    
+    // Цикл по всем сообщениям
+    while (i < bundle.MessageCount) {
         email = bundle.GetEmail(i);
-        console.log(i + " From: " + email.From + " Subject: " + email.Subject + " " + email.EmailDateStr);
+        console.log(i + " From: " + email.FromAddress + " Subject: " + email.Subject + " " + email.EmailDateStr+ " "+email.NumAttachments);
+        // Если есть attachment:
+        if (email.NumAttachments > 0) {
+            // Создается каталог с именем UIDls (если такого каталога еще нет)
+            try{
+                mDir = dirPath+`/`+saUidls.GetString(i);
+                fs.mkdirSync(mDir);
+                } catch (err) {
+                    if (err.code !== 'EEXIST') {
+                        throw err;
+                    }            
+                }
 
+            // Сохраняю файл в каталог, если файла еще нет
+            if (!fs.existsSync(mDir + `/` + email.GetAttachmentFilename(0))) {
+                success = email.SaveAllAttachments(mDir);
+                if (success !== true) {
+                    console.log(email.LastErrorText);
+                    return;
+                }
+                // Запись в массив для дальнейшей обработки
+                sa2Mng.push(mDir + `/` + email.GetAttachmentFilename(0));
+            }
+        }
+        
         // -----------------------------
         // Удаление почтового сообщения
         /*
@@ -88,9 +121,10 @@ function chilkatExample() {
         */
         // -----------------------------
 
-        i = i+1;
+        i = i+1; // счетчик UP
+
     }
-    
+
     // Make sure the POP3 session is ended to finalize the deletes.
     success = mailman.Pop3EndSession();
     if (success !== true) {
@@ -101,5 +135,9 @@ function chilkatExample() {
 
 }
 
-chilkatExample();
+doPOP3Mail();
+
+// Какие файлы нужно обработать:
+sa2Mng.forEach(element => console.log(element));
+
 // ----------------------------------------------------
