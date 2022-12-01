@@ -1,4 +1,5 @@
 const config = require('config');
+const { Console } = require('console');
 
 var os = require('os');
 if (os.platform() == 'win32') {  
@@ -47,7 +48,7 @@ function chilkatExample() {
 
     mailman.MailHost = "pop.mail.ru";
     mailman.PopUsername = "alkuplenko@mail.ru";
-    mailman.PopPassword = "";
+    mailman.PopPassword = "F70X29UAihqs7se6KaEu";
     mailman.PopSsl = true;
     mailman.MailPort = 995;
 
@@ -56,6 +57,10 @@ function chilkatExample() {
     // mailman.PopPassword = "";
     // mailman.PopSsl = true;
     // mailman.MailPort = 110;
+
+    // Количество писем в
+    var numMessages = mailman.GetMailboxCount();
+    console.log(`num messages:` + numMessages);
 
     var bundle = mailman.GetAllHeaders(1)
 
@@ -68,10 +73,32 @@ function chilkatExample() {
     var email;
     while (i < bundle.MessageCount - 1) {
         email = bundle.GetEmail(i);
-        console.log("From: " + email.From);
-        console.log("Subject: " + email.Subject + " " + email.EmailDateStr);
+        console.log(i + " From: " + email.From + " Subject: " + email.Subject + " " + email.EmailDateStr);
+
+        // -----------------------------
+        // Удаление почтового сообщения
+        /*
+        if (i == 0) {
+            var success = mailman.DeleteEmail(email);
+            if (success !== true) {
+                console.log(mailman.LastErrorText);
+                return;
+            }
+        }
+        */
+        // -----------------------------
+
         i = i+1;
     }
+    
+    // Make sure the POP3 session is ended to finalize the deletes.
+    success = mailman.Pop3EndSession();
+    if (success !== true) {
+        console.log(mailman.LastErrorText);
+    } else {
+        console.log(`POP3 connection closed`);
+    }
+
 }
 
 chilkatExample();

@@ -1,3 +1,5 @@
 Пакеты:
 npm install config
-npm install @chilkat/ck-node16-win64
+npm install @chilkat/ck-node16-win64 
+    http://www.chilkatsoft.com/refdoc/nodejsMailManRef.html
+    https://www.example-code.com/nodejs/pop3.asp - examples pop3
