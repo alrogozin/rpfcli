@@ -47,13 +47,13 @@ function chilkatExample() {
 
     mailman.MailHost = "pop.mail.ru";
     mailman.PopUsername = "alkuplenko@mail.ru";
-    mailman.PopPassword = "F70X29UAihqs7se6KaEu";
+    mailman.PopPassword = "";
     mailman.PopSsl = true;
     mailman.MailPort = 995;
 
     // mailman.MailHost = "lssv03.domain.local";
     // mailman.PopUsername = "DOMAIN\ARogozin";
-    // mailman.PopPassword = "dctulfxelj";
+    // mailman.PopPassword = "";
     // mailman.PopSsl = true;
     // mailman.MailPort = 110;
 
