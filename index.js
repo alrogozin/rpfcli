@@ -17,3 +17,5 @@ if (config.has('DBConnection.host')) {
 }
 
 console.log(dbConn.iHost);
+
+// run something
