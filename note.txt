@@ -5,3 +5,4 @@ npm install @chilkat/ck-node16-win64
     https://www.example-code.com/nodejs/pop3.asp - examples pop3
     https://www.example-code.com/nodejs/pop3_saveAttachments.asp
 npm install --save uid
+npm install sleep-promise

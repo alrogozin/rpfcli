@@ -2,7 +2,6 @@
 const fs = require('fs');
 const config = require('config');
 const f = require('./manage_fs')
-const { Console } = require('console');
 
 var os = require('os');
 if (os.platform() == 'win32') {  
@@ -37,7 +36,6 @@ const dbConn = {
 }
 
 let host = '';
-let sa2Mng = [];
 
 if (config.has('DBConnection.host')) {
    dbConn.iHost = config.get('DBConnection.host');
@@ -60,6 +58,7 @@ for(var i = 0; i < list.length; i++) {
 // ----------------------------------------------------
 //  Test pop3
 function doPOP3Mail() {
+    let sa2Mng = [];
     var mailman = new chilkat.MailMan();
 
     mailman.MailHost = "pop.mail.ru";
@@ -70,72 +69,71 @@ function doPOP3Mail() {
 
     // Количество писем в ящике
     var numMessages = mailman.GetMailboxCount();
-    console.log(`Messages total:` + numMessages);
 
-    var bundle = mailman.CopyMail();
-    if (mailman.LastMethodSuccess !== true) {
-        console.log(mailman.LastErrorText);
-        return;
-    }
-
-    // Получение UIDls
-    var saUidls = mailman.GetUidls(); // saUidls.GetString(0)
-    if (mailman.LastMethodSuccess !== true) {
-        console.log(mailman.LastErrorText);
-        return;
-    }
-
-    // Declarations
-    var i = 0;
-    var email;
-    var mDir = "";
-    
-    // Цикл по всем сообщениям
-    while (i < bundle.MessageCount) {
-        email = bundle.GetEmail(i);
-        console.log(i + " From: " + email.FromAddress + " Subject: " + email.Subject + " " + email.EmailDateStr+ " "+email.NumAttachments);
-        // Если есть attachment:
-        if (email.NumAttachments > 0) {
-            // Создается каталог с именем UIDls (если такого каталога еще нет)
-            try{
-                mDir = dirPath+`/`+saUidls.GetString(i);
-                fs.mkdirSync(mDir);
-                } catch (err) {
-                    if (err.code !== 'EEXIST') {
-                        throw err;
-                    }            
-                }
-
-            // Сохраняю файл в каталог, если файла еще нет
-            if (!fs.existsSync(mDir + `/` + email.GetAttachmentFilename(0))) {
-                success = email.SaveAllAttachments(mDir);
-                if (success !== true) {
-                    console.log(email.LastErrorText);
-                    return;
-                }
-                // Запись в массив для дальнейшей обработки
-                sa2Mng.push(mDir + `/` + email.GetAttachmentFilename(0));
-            }
+    if (numMessages > 0) {
+        var bundle = mailman.CopyMail();
+        if (mailman.LastMethodSuccess !== true) {
+            console.log(mailman.LastErrorText);
+            return;
         }
+
+        // Получение UIDls
+        var saUidls = mailman.GetUidls(); // saUidls.GetString(0)
+        if (mailman.LastMethodSuccess !== true) {
+            console.log('~~~' + mailman.LastErrorText);
+            return;
+        }
+
+        // Declarations
+        var i = 0;
+        var email;
+        var mDir = "";
         
-        // -----------------------------
-        // Удаление почтового сообщения
-        /*
-        if (i == 0) {
-            var success = mailman.DeleteEmail(email);
-            if (success !== true) {
-                console.log(mailman.LastErrorText);
-                return;
+        // Цикл по всем сообщениям
+        while (i < bundle.MessageCount) {
+            email = bundle.GetEmail(i);
+            console.log(i + " From: " + email.FromAddress + " Subject: " + email.Subject + " " + email.EmailDateStr+ " "+email.NumAttachments);
+            // Если есть attachment:
+            if (email.NumAttachments > 0) {
+                // Создается каталог с именем UIDls (если такого каталога еще нет)
+                try{
+                    mDir = dirPath+`/`+saUidls.GetString(i);
+                    fs.mkdirSync(mDir);
+                    } catch (err) {
+                        if (err.code !== 'EEXIST') {
+                            throw err;
+                        }            
+                    }
+
+                // Сохраняю файл в каталог, если файла еще нет
+                if (!fs.existsSync(mDir + `/` + email.GetAttachmentFilename(0))) {
+                    success = email.SaveAllAttachments(mDir);
+                    if (success !== true) {
+                        console.log(email.LastErrorText);
+                        return;
+                    }
+                    // Запись в массив для дальнейшей обработки
+                    sa2Mng.push(mDir + `/` + email.GetAttachmentFilename(0));
+                }
+                // -----------------------------
+                // Удаление почтового сообщения
+                // if (i == 0) {
+                    var success = mailman.DeleteEmail(email);
+                    if (success !== true) {
+                        console.log(mailman.LastErrorText);
+                        return;
+                    }
+                // }
             }
+            
+            // -----------------------------
+
+            i = i+1; // счетчик UP
+
         }
-        */
-        // -----------------------------
 
-        i = i+1; // счетчик UP
-
+        // Make sure the POP3 session is ended to finalize the deletes.
     }
-
-    // Make sure the POP3 session is ended to finalize the deletes.
     success = mailman.Pop3EndSession();
     if (success !== true) {
         console.log(mailman.LastErrorText);
@@ -145,10 +143,25 @@ function doPOP3Mail() {
 
 }
 
-doPOP3Mail();
+
+// var i = 1;
+
+function EndessLoop() {
+  setTimeout(function() {
+    console.log('Starting');
+    doPOP3Mail();
+    //  i++;
+    //  if (i < 4) {
+        EndessLoop();
+    //  }
+  }, 3000)
+}
+
+EndessLoop();  
+
 
 // Какие файлы нужно обработать:
 // F70X29UAihqs7se6KaEu
-sa2Mng.forEach(element => console.log(element));
+// sa2Mng.forEach(element => console.log(element));
 
 // ----------------------------------------------------
