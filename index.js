@@ -1,6 +1,7 @@
 // const uid = require('uid');
 const fs = require('fs');
 const config = require('config');
+const f = require('./manage_fs')
 const { Console } = require('console');
 
 var os = require('os');
@@ -25,6 +26,7 @@ if (os.platform() == 'win32') {
 // ----------------------------------------------------
 //  Config
 const dbConnection = config.get('DBConnection');
+var dirPath = "attachments";
 
 // console.log(uid.uid());
 
@@ -45,6 +47,15 @@ if (config.has('DBConnection.host')) {
 // console.log(dbConn.iHost);
 
 // ----------------------------------------------------
+// Удаление "старых" (> 10 дней) каталогов с содержимым
+var list = fs.readdirSync(dirPath);
+let ddate, sysdate = new Date();
+for(var i = 0; i < list.length; i++) {
+    ddate = f.get_dir_date(dirPath+`/`+list[i]);
+    if (f.Get_DaysDiff(ddate, sysdate) > 0 ) {
+        f.Remove_Dir(dirPath+`/`+list[i]);
+    };
+}
 
 // ----------------------------------------------------
 //  Test pop3
@@ -77,7 +88,6 @@ function doPOP3Mail() {
     // Declarations
     var i = 0;
     var email;
-    var dirPath = "attachments";
     var mDir = "";
     
     // Цикл по всем сообщениям
@@ -138,6 +148,7 @@ function doPOP3Mail() {
 doPOP3Mail();
 
 // Какие файлы нужно обработать:
+// F70X29UAihqs7se6KaEu
 sa2Mng.forEach(element => console.log(element));
 
 // ----------------------------------------------------
