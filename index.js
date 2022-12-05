@@ -26,7 +26,7 @@ if (os.platform() == 'win32') {
 //  Config
 const dbConnection = config.get('DBConnection');
 var dirPath = "attachments";
-
+const numDaysGap2DelLoadedFiles = config.get('numDaysGap2DelLoadedFiles');
 // console.log(uid.uid());
 
 const dbConn = {
@@ -45,12 +45,12 @@ if (config.has('DBConnection.host')) {
 // console.log(dbConn.iHost);
 
 // ----------------------------------------------------
-// Удаление "старых" (> 10 дней) каталогов с содержимым
+// Удаление "старых" (> numDaysGap2DelLoadedFiles дней) каталогов с содержимым
 var list = fs.readdirSync(dirPath);
 let ddate, sysdate = new Date();
 for(var i = 0; i < list.length; i++) {
     ddate = f.get_dir_date(dirPath+`/`+list[i]);
-    if (f.Get_DaysDiff(ddate, sysdate) > 0 ) {
+    if (f.Get_DaysDiff(ddate, sysdate) > numDaysGap2DelLoadedFiles ) {
         f.Remove_Dir(dirPath+`/`+list[i]);
     };
 }
@@ -146,6 +146,8 @@ function doPOP3Mail() {
 
 // var i = 1;
 
+// =========================================
+/*
 function EndessLoop() {
   setTimeout(function() {
     console.log('Starting');
@@ -158,7 +160,9 @@ function EndessLoop() {
 }
 
 EndessLoop();  
-
+*/
+// =========================================
+doPOP3Mail();
 
 // Какие файлы нужно обработать:
 // F70X29UAihqs7se6KaEu

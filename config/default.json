@@ -4,5 +4,7 @@
       "port": 1521,
       "dbName": "mvkbil",
       "user": "mvk"
-  }
+  },
+  // Кол.дней,после которых загруженные файлы будут удалены
+  "numDaysGap2DelLoadedFiles" : 2
 }
