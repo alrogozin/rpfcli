@@ -3,8 +3,13 @@
       "host": "mvkprod",
       "port": 1521,
       "dbName": "mvkbil",
-      "user": "mvk"
+      "password": "mvkprod$",
+      "user": "mvk",
+      "orcl_lib_dir": "D:/progs/oracle/bin/",
+      // "connect_string": "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=172.16.191.4)(PORT=1521))(ADDRESS=(PROTOCOL=TCP)(HOST=172.16.191.5)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=BILLTEST)))"
+      "connect_string": "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=172.16.27.9)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=BILLAPP)))"
   },
   // Кол.дней,после которых загруженные файлы будут удалены
-  "numDaysGap2DelLoadedFiles" : 2
+  "numDaysGap2DelLoadedFiles" : 0,
+  "timeOut": 5000
 }

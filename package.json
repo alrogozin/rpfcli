@@ -2,6 +2,7 @@
   "dependencies": {
     "@chilkat/ck-node16-win64": "^9.50.93",
     "config": "^3.3.8",
+    "oracledb": "^5.5.0",
     "sleep-promise": "^9.1.0",
     "uid": "^2.0.1"
   }
