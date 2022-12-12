@@ -5,7 +5,7 @@ const f 		= require('fs');
 try {
     oracledb.initOracleClient({libDir: config.get('DBConnection.orcl_lib_dir')});
   } catch (err) {
-    console.error('Whoops!');
+	console.error(`Whoops! ${config.get('DBConnection.orcl_lib_dir')}`);
     console.error(err);
     process.exit(1);
   }

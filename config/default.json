@@ -5,8 +5,11 @@
       "dbName": "mvkbil",
       "password": "mvkprod$",
       "user": "mvk",
+
+      // 172.16.3.72: "orcl_lib_dir": "C:/app/client/agapov_ei/product/12.2.0/client_1/bin/",
       "orcl_lib_dir": "D:/progs/oracle/bin/",
-      // "connect_string": "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=172.16.191.4)(PORT=1521))(ADDRESS=(PROTOCOL=TCP)(HOST=172.16.191.5)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=BILLTEST)))"
+
+      //DAILY: "connect_string": "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=172.16.191.4)(PORT=1521))(ADDRESS=(PROTOCOL=TCP)(HOST=172.16.191.5)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=BILLTEST)))"
       "connect_string": "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=172.16.27.9)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=BILLAPP)))"
   },
   // Кол.дней,после которых загруженные файлы будут удалены
