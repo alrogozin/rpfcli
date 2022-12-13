@@ -3,6 +3,7 @@ const fs = require('fs');
 const config = require('config');
 const f = require('./manage_fs')
 const o = require('./manage_oracle')
+const cmn = require('./common_tools')
 
 var os = require('os');
 if (os.platform() == 'win32') {  
@@ -28,7 +29,6 @@ if (os.platform() == 'win32') {
 const dbConnection = config.get('DBConnection');
 var dirPath = "attachments";
 const numDaysGap2DelLoadedFiles = config.get('numDaysGap2DelLoadedFiles');
-// console.log(uid.uid());
 
 const dbConn = {
     iHost: '',
@@ -43,7 +43,6 @@ if (config.has('DBConnection.host')) {
 } else {
    throw new Error('error in config DBConnection.host');
 }
-// console.log(dbConn.iHost);
 
 // ----------------------------------------------------
 class msgData {
@@ -98,28 +97,30 @@ function doPOP3Mail() {
 
     // Количество писем в ящике
     var numMessages = mailman.GetMailboxCount();
-    console.log(`nummesaages:` + numMessages);
+    
+    cmn.do_output(`Messages: ${numMessages}`, 'INFO');
+    
     if (mailman.LastMethodSuccess !== true) {
-        console.log(mailman.LastErrorText);
+        cmn.do_output(mailman.LastErrorText, 'ERROR');
         return;
     }
 
     if (numMessages == -1) {
-        console.log("Connection doesn't established");
+        cmn.do_output("Connection doesn't established", 'ERROR');
         // throw new Error("Connection doesn't established");
     } 
     else if (numMessages > 0) {
-        console.log(`POP3 connection established`);        
+        cmn.do_output(`Connection to POP3 server established`); 
         var bundle = mailman.CopyMail();
         if (mailman.LastMethodSuccess !== true) {
-            console.log(mailman.LastErrorText);
+            cmn.do_output(mailman.LastErrorText, 'ERROR');
             return;
         }
 
         // Получение UIDls
         var saUidls = mailman.GetUidls(); // saUidls.GetString(0)
         if (mailman.LastMethodSuccess !== true) {
-            console.log('~~~' + mailman.LastErrorText);
+            cmn.do_output('~~~' + mailman.LastErrorText, 'ERROR');
             return;
         }
 
@@ -131,10 +132,8 @@ function doPOP3Mail() {
         // Цикл по всем сообщениям
         while (i < bundle.MessageCount) {
             email = bundle.GetEmail(i);
-            // console.log(i + " From: " + email.FromAddress + " Subject: " + email.Subject + " " + email.EmailDateStr+ " "+email.NumAttachments);
             // Если есть attachment:
             if (email.NumAttachments > 0) {
-                // let msg_date = new msgData(email.Uidl, email.EmailDateStr, email.FromAddress, email.FromName, email.Subject);
                 // Создается каталог с именем UIDls (если такого каталога еще нет)
                 try{
                     mDir = dirPath+`/`+saUidls.GetString(i);
@@ -149,7 +148,7 @@ function doPOP3Mail() {
                 if (!fs.existsSync(mDir + `/` + email.GetAttachmentFilename(0))) {
                     success = email.SaveAllAttachments(mDir);
                     if (success !== true) {
-                        console.log(email.LastErrorText);
+                        cmn.do_output(email.LastErrorText, 'ERROR');
                         return;
                     }
                     // Запись в массив для дальнейшей обработки
@@ -173,7 +172,7 @@ function doPOP3Mail() {
             // if (i == 0) {
                 var success = mailman.DeleteEmail(email);
                 if (success !== true) {
-                    console.log(mailman.LastErrorText);
+                    cmn.do_output(mailman.LastErrorText, 'ERROR');
                     return;
                 }
             // }
@@ -186,13 +185,11 @@ function doPOP3Mail() {
     // End the POP3 session and close the connection to the POP3 server.
     success = mailman.Pop3EndSession();
     if (success !== true) {
-        console.log(mailman.LastErrorText);
+        cmn.do_output(mailman.LastErrorText, 'ERROR');
     } else {
-        console.log(`POP3 connection closed`);
+        cmn.do_output(`POP3 connection closed`, 'INFO');
     }
 
-    // console.log(message2manage.length);
-    // console.log(message2manage);
 
 }
 
@@ -201,7 +198,7 @@ function doPOP3Mail() {
 function EndessLoop() {
     let timeOut = config.get('timeOut');
     setTimeout(function() {
-        console.log('Starting timeout:', timeOut);
+        cmn.do_output(`Starting: ${Date().toLocaleString()}  interval: ${timeOut}`, 'INFO');
         doPOP3Mail();
         EndessLoop();
     }, timeOut)
@@ -212,10 +209,8 @@ EndessLoop();
 // doPOP3Mail();
 
 // =========================================
-// console.log(o.get_oracle_status());
 
 // Какие файлы нужно обработать:
 // F70X29UAihqs7se6KaEu
-// sa2Mng.forEach(element => console.log(element));
 
 // ----------------------------------------------------

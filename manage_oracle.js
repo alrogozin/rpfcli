@@ -1,6 +1,7 @@
 const config 	= require('config');
 const oracledb 	= require('oracledb');
 const f 		= require('fs');
+const cmn 		= require('./common_tools')
 
 try {
     oracledb.initOracleClient({libDir: config.get('DBConnection.orcl_lib_dir')});
@@ -9,10 +10,10 @@ try {
     console.error(err);
     process.exit(1);
   }
-  console.log(`Ok client version: ` + oracledb.oracleClientVersionString);
+  cmn.do_output(`Ok client version: ` + oracledb.oracleClientVersionString, 'INFO');
 
 async function  oracle_run(msgData) {
-	console.log(msgData.from_name);
+	cmn.do_output(msgData.from_name, 'INFO');
 	let connection;
   
 	try {
@@ -22,7 +23,6 @@ async function  oracle_run(msgData) {
 		connectString : config.get('DBConnection.connect_string')
 	  });
 	
-	  // console.log(connection.oracleServerVersionString);
 	let buff = f.readFileSync(msgData.path_to_file);
 
 	const result = await connection.execute(
@@ -43,8 +43,6 @@ async function  oracle_run(msgData) {
 		}
 	 );
 
-	//  console.log(`pmd_id:${result.outBinds.ret}`);
-
 	 const result2 = await connection.execute(
 		`Begin
 			:ret:= post_mail_pkg.save_attachment(
@@ -63,17 +61,17 @@ async function  oracle_run(msgData) {
 	 );
 
 	connection.commit();
-	// console.log(`pmt_attach ${result2.outBinds.ret}`);
-	console.log(`Oracle data saved, file_name: ${msgData.file_name}`);
+
+	cmn.do_output(`Oracle data saved, file_name: ${msgData.file_name}`, 'INFO');
 
 	} catch (err) {
-		console.error(err);
+		cmn.do_output(err, 'ERROR');
 	} finally {
 		if (connection) {
 			try {
 				await connection.close();
 			} catch (err) {
-				console.error(err);
+				cmn.do_output(err, 'ERROR');
 			}
 		}
 	}
